@@ -30,14 +30,14 @@ fun Step1(){
         )
         Text(text = "次回の授業の目標と背景を確認しましょう！")
         Text(text = "確認ができたら、右下のボタンを押して次のステップに進みましょう。")
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(60.dp))
         Column(
             modifier = Modifier
         ) {
             Text(text = "授業の目標", fontSize = 20.sp, fontWeight = FontWeight.Bold)
             Text(text = "インターネットのプロトコルについて学ぶ")
         }
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(40.dp))
         Column(
             modifier = Modifier
         ) {
