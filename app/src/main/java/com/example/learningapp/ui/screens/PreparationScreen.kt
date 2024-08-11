@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.example.learningapp.ui.components.Step1
 import com.example.learningapp.ui.components.Step2
+import com.example.learningapp.ui.components.Step3
 import com.example.learningapp.ui.components.StepProgressBar
 
 const val lessonTitleText = "第2回　予習"
@@ -71,7 +72,8 @@ fun PreparationScreen() {
 
 
 //            Step1()
-            Step2()
+//            Step2()
+            Step3()
         }
     }
 }
