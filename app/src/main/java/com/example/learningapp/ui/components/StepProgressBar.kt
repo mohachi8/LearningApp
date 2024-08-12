@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun StepProgressBar(
     currentStep: Int,
-    activeColor: Color = MaterialTheme.colorScheme.secondary,
+    activeColor: Color = MaterialTheme.colorScheme.primary,
     inactiveColor: Color = Color.Gray,
     circleDiameter: Float = 30f
 ) {
@@ -65,6 +65,7 @@ fun StepWithLine(
         NumberInCircle(
             number = number,
             color = circleColor,
+            isActive = isActive,
             modifier = Modifier.align(Alignment.Center)
         )
     }
@@ -74,6 +75,7 @@ fun StepWithLine(
 fun NumberInCircle(
     number: String,
     color: Color,
+    isActive: Boolean,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -82,6 +84,8 @@ fun NumberInCircle(
             .size(30.dp)
             .background(color, shape = CircleShape)
     ) {
-        Text(text = number, color = MaterialTheme.colorScheme.onPrimary)
+        if (isActive) {
+            Text(text = number, color = MaterialTheme.colorScheme.onPrimary)
+        }
     }
 }

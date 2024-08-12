@@ -51,7 +51,6 @@ fun KeywordContainer(
     Column(
         modifier = Modifier
             .padding(vertical = 10.dp)
-//            .background(color = MaterialTheme.colorScheme.tertiaryContainer)
     ) {
         HorizontalDivider(modifier = Modifier.fillMaxWidth())
         Text(
@@ -64,16 +63,16 @@ fun KeywordContainer(
         OutlinedTextField(
             value = textState.value,
             onValueChange = { textState.value = it },
-            label = { Text("キーワードの意味") }, // ラベルを追加
-            modifier = Modifier.fillMaxWidth() // 横幅を最大に設定
+            label = { Text("キーワードの意味") },
+            modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(10.dp))
         OutlinedTextField(
             value = textState.value,
             onValueChange = { textState.value = it },
-            label = { Text("参考文献") }, // ラベルを追加
+            label = { Text("参考文献") },
             placeholder = { Text("例：教科書p○○、WebサイトのURL") },
-            modifier = Modifier.fillMaxWidth() // 横幅を最大に設定
+            modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(10.dp))
     }

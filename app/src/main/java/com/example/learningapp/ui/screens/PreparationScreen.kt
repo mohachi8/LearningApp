@@ -3,12 +3,17 @@ package com.example.learningapp.ui.screens
 import StepProgressBar
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.rounded.CheckCircleOutline
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -22,11 +27,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.learningapp.ui.components.Step1
 import com.example.learningapp.ui.components.Step2
@@ -38,12 +49,13 @@ const val lessonTitleText = "第2回　予習"
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PreparationScreen(
+    mainNavController: NavHostController,
     navController: NavHostController = rememberNavController(),
     stepViewModel: StepViewModel = viewModel()
 ) {
     val currentStep by stepViewModel.currentStep.collectAsState()
 
-    // ナビゲーションのバックスタックを監視し、currentStepを更新
+    // 現在のステップを更新→プログレッションバーに反映
     LaunchedEffect(navController) {
         navController.currentBackStackEntryFlow.collect { backStackEntry ->
             when (backStackEntry.destination.route) {
@@ -53,6 +65,10 @@ fun PreparationScreen(
             }
         }
     }
+
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -60,7 +76,17 @@ fun PreparationScreen(
                     Text(text = lessonTitleText)
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = {
+                        if (currentRoute == "step1") {
+                            mainNavController.navigate("home") {
+                                popUpTo(mainNavController.graph.startDestinationId) {
+                                    inclusive = true
+                                }
+                            }
+                        } else {
+                            navController.popBackStack()
+                        }
+                    }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
@@ -77,14 +103,19 @@ fun PreparationScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = {
-//                stepViewModel.nextStep()
-                val nextRoute = when (currentStep) {
-                    1 -> "step2"
-                    2 -> "step3"
-                    else -> null
-                }
-                nextRoute?.let {
-                    navController.navigate(it)
+                if (currentRoute == "completion") {
+                    mainNavController.navigate("home") {
+                        popUpTo(mainNavController.graph.startDestinationId) {
+                            inclusive = true
+                        }
+                    }
+                } else {
+                    val nextRoute = when (currentStep) {
+                        1 -> "step2"
+                        2 -> "step3"
+                        else -> "completion"
+                    }
+                    navController.navigate(nextRoute)
                 }
             }) {
                 Icon(
@@ -101,16 +132,43 @@ fun PreparationScreen(
                 .fillMaxSize()
         ) {
 
-            StepProgressBar(currentStep = currentStep)
-
-            NavigationHost(navController = navController, modifier = Modifier.fillMaxSize())
-
+            if (currentRoute != "completion") {
+                StepProgressBar(currentStep = currentStep)
+            }
+            LearningNavHost(navController = navController, modifier = Modifier.fillMaxSize())
         }
     }
 }
 
+// 完了画面
 @Composable
-fun NavigationHost(navController: NavHostController, modifier: Modifier = Modifier) {
+fun CompletionScreen() {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Text(text = "予習完了！", fontSize = 30.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(60.dp))
+        Icon(
+            imageVector = Icons.Rounded.CheckCircleOutline,
+            contentDescription = "Completion",
+            tint = Color.Green,
+            modifier = Modifier.size(250.dp)
+        )
+        Spacer(modifier = Modifier.height(30.dp))
+        Text(text = "素晴らしいです！", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(
+            text = "授業に出席して、学びを深めましょう。",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
+fun LearningNavHost(navController: NavHostController, modifier: Modifier = Modifier) {
     NavHost(navController, startDestination = "step1", modifier = modifier) {
         composable(route = "step1",
             enterTransition = {
@@ -187,5 +245,29 @@ fun NavigationHost(navController: NavHostController, modifier: Modifier = Modifi
                     animationSpec = tween(700)
                 )
             }) { Step3() }
+        composable(route = "completion", enterTransition = {
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Companion.Left,
+                animationSpec = tween(700)
+            )
+        },
+            exitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Companion.Left,
+                    animationSpec = tween(700)
+                )
+            },
+            popEnterTransition = {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Companion.Right,
+                    animationSpec = tween(700)
+                )
+            },
+            popExitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Companion.Right,
+                    animationSpec = tween(700)
+                )
+            }) { CompletionScreen() }
     }
 }
