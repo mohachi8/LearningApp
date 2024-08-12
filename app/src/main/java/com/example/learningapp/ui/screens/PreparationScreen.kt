@@ -42,6 +42,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.learningapp.ui.components.Step1
 import com.example.learningapp.ui.components.Step2
 import com.example.learningapp.ui.components.Step3
+import com.example.learningapp.viewmodel.KeywordViewModel
 import com.example.learningapp.viewmodel.StepViewModel
 
 const val lessonTitleText = "第2回　予習"
@@ -51,7 +52,8 @@ const val lessonTitleText = "第2回　予習"
 fun PreparationScreen(
     mainNavController: NavHostController,
     navController: NavHostController = rememberNavController(),
-    stepViewModel: StepViewModel = viewModel()
+    stepViewModel: StepViewModel = viewModel(),
+    keywordViewModel: KeywordViewModel = viewModel()
 ) {
     val currentStep by stepViewModel.currentStep.collectAsState()
 
@@ -78,6 +80,11 @@ fun PreparationScreen(
                 navigationIcon = {
                     IconButton(onClick = {
                         if (currentRoute == "step1") {
+                            keywordViewModel.saveKeyword(
+                                title = "プロトコル", // Example title
+                                meaning = keywordViewModel.meaning.value,
+                                reference = keywordViewModel.reference.value
+                            )
                             mainNavController.navigate("home") {
                                 popUpTo(mainNavController.graph.startDestinationId) {
                                     inclusive = true

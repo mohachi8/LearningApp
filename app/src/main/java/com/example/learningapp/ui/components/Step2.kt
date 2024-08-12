@@ -1,5 +1,6 @@
 package com.example.learningapp.ui.components
 
+import android.app.Application
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,9 +13,11 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,14 +53,12 @@ fun Step2() {
 
 @Composable
 fun KeywordContainer(
-    title: String
-) {
-    // ViewModelに固有のキーを持たせる
-    val viewModel: KeywordViewModel = viewModel(
-        key = title, // titleをキーとして使う
-        factory = KeywordViewModelFactory()
+    title: String,
+    viewModel: KeywordViewModel = viewModel(
+        key = title,
+        factory = KeywordViewModelFactory(LocalContext.current.applicationContext as Application)
     )
-
+) {
     val meaning by viewModel.meaning.collectAsState()
     val reference by viewModel.reference.collectAsState()
 
@@ -74,28 +75,34 @@ fun KeywordContainer(
         )
         OutlinedTextField(
             value = meaning,
-            onValueChange = { viewModel.saveKeyword(it, reference) },
+            onValueChange = { viewModel.updateMeaningAndReference(it, reference) },
             label = { Text("キーワードの意味") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(10.dp))
         OutlinedTextField(
             value = reference,
-            onValueChange = { viewModel.saveKeyword(meaning, it) },
+            onValueChange = { viewModel.updateMeaningAndReference(meaning, it) },
             label = { Text("参考文献") },
             placeholder = { Text("例：教科書p○○、WebサイトのURL") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(10.dp))
+
+        LaunchedEffect(Unit) {
+            viewModel.saveKeyword(title, meaning, reference)
+        }
     }
 }
 
-// KeywordViewModelのFactoryを定義
-class KeywordViewModelFactory : ViewModelProvider.Factory {
+
+class KeywordViewModelFactory(
+    private val application: Application
+) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(KeywordViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return KeywordViewModel() as T
+            return KeywordViewModel(application) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

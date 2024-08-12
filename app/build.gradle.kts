@@ -73,9 +73,8 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
-    val roomVersion = "2.5.0"
     // Room dependencies
-    implementation("androidx.room:room-runtime:$roomVersion")
-    implementation("androidx.room:room-ktx:$roomVersion")
-    kapt("androidx.room:room-compiler:$roomVersion")
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.7.0-alpha06")
+    kapt(libs.androidx.room.compiler)
 }
