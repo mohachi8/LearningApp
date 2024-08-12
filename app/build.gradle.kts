@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("kotlin-kapt")
 }
 
 android {
@@ -71,4 +72,10 @@ dependencies {
     //noinspection UseTomlInstead
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+
+    val roomVersion = "2.5.0"
+    // Room dependencies
+    implementation("androidx.room:room-runtime:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+    kapt("androidx.room:room-compiler:$roomVersion")
 }
