@@ -13,7 +13,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -27,10 +26,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.learningapp.viewmodel.KeywordViewModel
 
 @Composable
-fun Step2() {
-    val viewModel: KeywordViewModel = viewModel(
+fun Step2(
+    keywordViewModel: KeywordViewModel = viewModel(
         factory = KeywordViewModelFactory(LocalContext.current.applicationContext as Application)
     )
+) {
+
 
     Column(
         modifier = Modifier
@@ -48,9 +49,9 @@ fun Step2() {
         Text(text = "参考にした教科書のページやWebサイトのURLも記載しておきましょう。")
         Spacer(modifier = Modifier.height(20.dp))
 
-        KeywordContainer("プロトコル", viewModel)
-        KeywordContainer("TCP/IP", viewModel)
-        KeywordContainer("OSI参照モデル", viewModel)
+        KeywordContainer("プロトコル", keywordViewModel)
+        KeywordContainer("TCP/IP", keywordViewModel)
+        KeywordContainer("OSI参照モデル", keywordViewModel)
         Spacer(modifier = Modifier.height(80.dp))
     }
 }

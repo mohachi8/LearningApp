@@ -41,9 +41,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.learningapp.data.local.AppDatabase
+import com.example.learningapp.data.local.KeywordDatabase
 import com.example.learningapp.ui.components.Step1
 import com.example.learningapp.ui.components.Step2
 import com.example.learningapp.ui.components.Step3
+import com.example.learningapp.viewmodel.KeywordViewModel
 import com.example.learningapp.viewmodel.Step3ViewModel
 import com.example.learningapp.viewmodel.StepViewModel
 
@@ -58,9 +60,11 @@ fun PreparationScreen(
 ) {
     val currentStep by stepViewModel.currentStep.collectAsState()
     // ViewModelを取得
+    val keywordViewModel: KeywordViewModel = viewModel()
     val step3ViewModel: Step3ViewModel = viewModel()
     // step3Daoの取得
     val context = LocalContext.current
+    val keywordDao = KeywordDatabase.getDatabase(context).keywordDao()
     val step3Dao = AppDatabase.getDatabase(context).step3Dao()
 
     // 現在のステップを更新→プログレッションバーに反映
@@ -112,6 +116,8 @@ fun PreparationScreen(
         floatingActionButton = {
             FloatingActionButton(onClick = {
                 if (currentRoute == "completion") {
+                    // データをDatabaseに保存
+                    keywordViewModel.saveAllKeywords(keywordDao)
                     step3ViewModel.saveContentToDatabase(step3Dao)
                     mainNavController.navigate("home") {
                         popUpTo(mainNavController.graph.startDestinationId) {
@@ -147,6 +153,7 @@ fun PreparationScreen(
             LearningNavHost(
                 navController = navController,
                 modifier = Modifier.fillMaxSize(),
+                keywordViewModel = keywordViewModel,
                 step3ViewModel = step3ViewModel
             )
         }
@@ -184,6 +191,7 @@ fun CompletionScreen() {
 fun LearningNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier,
+    keywordViewModel: KeywordViewModel,
     step3ViewModel: Step3ViewModel
 ) {
     NavHost(navController, startDestination = "step1", modifier = modifier) {
@@ -237,7 +245,7 @@ fun LearningNavHost(
                     towards = AnimatedContentTransitionScope.SlideDirection.Companion.Right,
                     animationSpec = tween(700)
                 )
-            }) { Step2() }
+            }) { Step2(keywordViewModel = keywordViewModel) }
         composable(route = "step3", enterTransition = {
             slideIntoContainer(
                 towards = AnimatedContentTransitionScope.SlideDirection.Companion.Left,
