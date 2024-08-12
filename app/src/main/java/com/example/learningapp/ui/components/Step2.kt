@@ -28,6 +28,10 @@ import com.example.learningapp.viewmodel.KeywordViewModel
 
 @Composable
 fun Step2() {
+    val viewModel: KeywordViewModel = viewModel(
+        factory = KeywordViewModelFactory(LocalContext.current.applicationContext as Application)
+    )
+
     Column(
         modifier = Modifier
             .padding(10.dp)
@@ -44,9 +48,9 @@ fun Step2() {
         Text(text = "参考にした教科書のページやWebサイトのURLも記載しておきましょう。")
         Spacer(modifier = Modifier.height(20.dp))
 
-        KeywordContainer("プロトコル")
-        KeywordContainer("TCP/IP")
-        KeywordContainer("OSI参照モデル")
+        KeywordContainer("プロトコル", viewModel)
+        KeywordContainer("TCP/IP", viewModel)
+        KeywordContainer("OSI参照モデル", viewModel)
         Spacer(modifier = Modifier.height(80.dp))
     }
 }
@@ -55,12 +59,13 @@ fun Step2() {
 fun KeywordContainer(
     title: String,
     viewModel: KeywordViewModel = viewModel(
-        key = title,
         factory = KeywordViewModelFactory(LocalContext.current.applicationContext as Application)
     )
 ) {
-    val meaning by viewModel.meaning.collectAsState()
-    val reference by viewModel.reference.collectAsState()
+    val keyword by viewModel.keywords.collectAsState()
+    val currentData = keyword[title] ?: Pair("", "")
+    val meaning = currentData.first
+    val reference = currentData.second
 
     Column(
         modifier = Modifier
@@ -75,23 +80,19 @@ fun KeywordContainer(
         )
         OutlinedTextField(
             value = meaning,
-            onValueChange = { viewModel.updateMeaningAndReference(it, reference) },
+            onValueChange = { newValue -> viewModel.updateKeyword(title, newValue, reference) },
             label = { Text("キーワードの意味") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(10.dp))
         OutlinedTextField(
             value = reference,
-            onValueChange = { viewModel.updateMeaningAndReference(meaning, it) },
+            onValueChange = { newValue -> viewModel.updateKeyword(title, meaning, newValue) },
             label = { Text("参考文献") },
             placeholder = { Text("例：教科書p○○、WebサイトのURL") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(10.dp))
-
-        LaunchedEffect(Unit) {
-            viewModel.saveKeyword(title, meaning, reference)
-        }
     }
 }
 

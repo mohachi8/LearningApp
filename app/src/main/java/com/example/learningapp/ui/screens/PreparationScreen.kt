@@ -27,6 +27,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,7 +44,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.learningapp.ui.components.Step1
 import com.example.learningapp.ui.components.Step2
 import com.example.learningapp.ui.components.Step3
+import com.example.learningapp.ui.components.saveData
 import com.example.learningapp.viewmodel.KeywordViewModel
+import com.example.learningapp.viewmodel.Step3ViewModel
 import com.example.learningapp.viewmodel.StepViewModel
 
 const val lessonTitleText = "第2回　予習"
@@ -56,6 +60,11 @@ fun PreparationScreen(
     keywordViewModel: KeywordViewModel = viewModel()
 ) {
     val currentStep by stepViewModel.currentStep.collectAsState()
+    // ViewModelを取得
+    val step3ViewModel: Step3ViewModel = viewModel()
+    // Step3の状態を保持
+    val textState = remember { mutableStateOf("") }
+
 
     // 現在のステップを更新→プログレッションバーに反映
     LaunchedEffect(navController) {
@@ -80,11 +89,6 @@ fun PreparationScreen(
                 navigationIcon = {
                     IconButton(onClick = {
                         if (currentRoute == "step1") {
-                            keywordViewModel.saveKeyword(
-                                title = "プロトコル", // Example title
-                                meaning = keywordViewModel.meaning.value,
-                                reference = keywordViewModel.reference.value
-                            )
                             mainNavController.navigate("home") {
                                 popUpTo(mainNavController.graph.startDestinationId) {
                                     inclusive = true
@@ -111,6 +115,7 @@ fun PreparationScreen(
         floatingActionButton = {
             FloatingActionButton(onClick = {
                 if (currentRoute == "completion") {
+                    saveData(step3ViewModel, textState.value)
                     mainNavController.navigate("home") {
                         popUpTo(mainNavController.graph.startDestinationId) {
                             inclusive = true
@@ -142,7 +147,7 @@ fun PreparationScreen(
             if (currentRoute != "completion") {
                 StepProgressBar(currentStep = currentStep)
             }
-            LearningNavHost(navController = navController, modifier = Modifier.fillMaxSize())
+            LearningNavHost(navController = navController, modifier = Modifier.fillMaxSize(),step3ViewModel = step3ViewModel)
         }
     }
 }
@@ -175,7 +180,7 @@ fun CompletionScreen() {
 }
 
 @Composable
-fun LearningNavHost(navController: NavHostController, modifier: Modifier = Modifier) {
+fun LearningNavHost(navController: NavHostController, modifier: Modifier = Modifier,step3ViewModel: Step3ViewModel) {
     NavHost(navController, startDestination = "step1", modifier = modifier) {
         composable(route = "step1",
             enterTransition = {
@@ -251,7 +256,7 @@ fun LearningNavHost(navController: NavHostController, modifier: Modifier = Modif
                     towards = AnimatedContentTransitionScope.SlideDirection.Companion.Right,
                     animationSpec = tween(700)
                 )
-            }) { Step3() }
+            }) { Step3(viewModel = step3ViewModel) }
         composable(route = "completion", enterTransition = {
             slideIntoContainer(
                 towards = AnimatedContentTransitionScope.SlideDirection.Companion.Left,

@@ -4,12 +4,12 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.learningapp.data.local.dao.KeywordDao
-import com.example.learningapp.data.local.entities.KeywordEntity
+import com.example.learningapp.data.local.dao.Step3Dao
+import com.example.learningapp.data.local.entities.Step3Entity
 
-@Database(entities = [KeywordEntity::class], version = 1, exportSchema = false)
+@Database(entities = [Step3Entity::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun keywordDao(): KeywordDao
+    abstract fun step3Dao(): Step3Dao
 
     companion object {
         @Volatile
@@ -20,7 +20,7 @@ abstract class AppDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "keyword_database"
+                    "learning_app_database"
                 ).build()
                 INSTANCE = instance
                 instance
