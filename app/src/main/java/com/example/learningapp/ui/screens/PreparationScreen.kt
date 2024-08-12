@@ -27,11 +27,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,11 +40,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.learningapp.data.local.AppDatabase
 import com.example.learningapp.ui.components.Step1
 import com.example.learningapp.ui.components.Step2
 import com.example.learningapp.ui.components.Step3
-import com.example.learningapp.ui.components.saveData
-import com.example.learningapp.viewmodel.KeywordViewModel
 import com.example.learningapp.viewmodel.Step3ViewModel
 import com.example.learningapp.viewmodel.StepViewModel
 
@@ -57,14 +55,13 @@ fun PreparationScreen(
     mainNavController: NavHostController,
     navController: NavHostController = rememberNavController(),
     stepViewModel: StepViewModel = viewModel(),
-    keywordViewModel: KeywordViewModel = viewModel()
 ) {
     val currentStep by stepViewModel.currentStep.collectAsState()
     // ViewModelを取得
     val step3ViewModel: Step3ViewModel = viewModel()
-    // Step3の状態を保持
-    val textState = remember { mutableStateOf("") }
-
+    // step3Daoの取得
+    val context = LocalContext.current
+    val step3Dao = AppDatabase.getDatabase(context).step3Dao()
 
     // 現在のステップを更新→プログレッションバーに反映
     LaunchedEffect(navController) {
@@ -115,7 +112,7 @@ fun PreparationScreen(
         floatingActionButton = {
             FloatingActionButton(onClick = {
                 if (currentRoute == "completion") {
-                    saveData(step3ViewModel, textState.value)
+                    step3ViewModel.saveContentToDatabase(step3Dao)
                     mainNavController.navigate("home") {
                         popUpTo(mainNavController.graph.startDestinationId) {
                             inclusive = true
@@ -147,7 +144,11 @@ fun PreparationScreen(
             if (currentRoute != "completion") {
                 StepProgressBar(currentStep = currentStep)
             }
-            LearningNavHost(navController = navController, modifier = Modifier.fillMaxSize(),step3ViewModel = step3ViewModel)
+            LearningNavHost(
+                navController = navController,
+                modifier = Modifier.fillMaxSize(),
+                step3ViewModel = step3ViewModel
+            )
         }
     }
 }
@@ -180,7 +181,11 @@ fun CompletionScreen() {
 }
 
 @Composable
-fun LearningNavHost(navController: NavHostController, modifier: Modifier = Modifier,step3ViewModel: Step3ViewModel) {
+fun LearningNavHost(
+    navController: NavHostController,
+    modifier: Modifier = Modifier,
+    step3ViewModel: Step3ViewModel
+) {
     NavHost(navController, startDestination = "step1", modifier = modifier) {
         composable(route = "step1",
             enterTransition = {
@@ -256,7 +261,7 @@ fun LearningNavHost(navController: NavHostController, modifier: Modifier = Modif
                     towards = AnimatedContentTransitionScope.SlideDirection.Companion.Right,
                     animationSpec = tween(700)
                 )
-            }) { Step3(viewModel = step3ViewModel) }
+            }) { Step3(step3ViewModel = step3ViewModel) }
         composable(route = "completion", enterTransition = {
             slideIntoContainer(
                 towards = AnimatedContentTransitionScope.SlideDirection.Companion.Left,

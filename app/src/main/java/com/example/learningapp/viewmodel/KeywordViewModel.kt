@@ -21,7 +21,6 @@ class KeywordViewModel(application: Application) : AndroidViewModel(application)
         _keywords.value = _keywords.value.toMutableMap().apply {
             put(title, Pair(meaning, reference))
         }
-//        Log.d("KeywordViewModel", "Updated keyword: $title, meaning: $meaning, reference: $reference")
     }
 
 //    fun saveAllKeywords() {
